@@ -24,7 +24,7 @@ atr <- paste0(as.character(data_limpo$`Categorização Atributos`), " (A)")
 cons <- paste0(as.character(data_limpo$`Categorização Consequências`), " (C)")
 val <- paste0(as.character(data_limpo$`Categorização Valores`), " (V)")
 
-
+    
 # ============ TABELA DE INTERAÇÕES
 
 # Garante a ordem estruturada: primeiro Atributos, depois Consequências e depois Valores

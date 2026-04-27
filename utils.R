@@ -53,7 +53,7 @@ filtrar_laddering <- function(conexoes) {
 plotar_mapa_hierarquico <- function(
   conexoes,
   levelSeparation = 150,
-  nodeSpacing = 150,
+  nodeSpacing = 250,
   multTamanhoMultiplicador = 1
 ) {
   # Criar grafo a partir de data frame
@@ -74,7 +74,7 @@ plotar_mapa_hierarquico <- function(
   nos <- data.frame(
     id = V(rede)$name,
     label = V(rede)$name,
-    shape = "circle", # Coloca o nome dentro da bolinha (ellipse ajusta melhor o texto do que 'circle')
+    shape = "box", # Coloca o nome dentro da bolinha (ellipse ajusta melhor o texto do que 'circle')
     borderWidth = 2, # Engrossa as linhas em volta do círculo
     color.background = "#FFFFFF", # O fundo agora é branco opaco pra literalmente esconder o pedaço da linha que entra no círculo!
     color.border = cor_da_borda,
@@ -84,8 +84,7 @@ plotar_mapa_hierarquico <- function(
     # Em formas geométricas tipo circle, diminuímos significativamente a fonte base e a taxa
     # de taxa de crescimento para caber na tela como 1/3 do volume (bolhas mais finas e organizadas)
     # *0.3 pra diminuir o tamanho excessivo
-    font.size = (9 + (degree(rede) * multTamanhoMultiplicador)) * 0.3,
-
+    font.size = 12,
     level = ifelse(
       grepl("\\(A\\)", V(rede)$name),
       1,
@@ -98,8 +97,7 @@ plotar_mapa_hierarquico <- function(
     from = conexoes$from,
     to = conexoes$to,
     value = conexoes$weight,
-    color = list(color = "#848484", highlight = "#d12a2a"),
-    arrows = "to"
+    title = paste("Força da conexão (Peso):", conexoes$weight) # Adicionando tooltip ao passar pelas arestas
   )
 
   # HTML/JS INTERATIVO
@@ -115,22 +113,29 @@ plotar_mapa_hierarquico <- function(
       levelSeparation = levelSeparation,
       nodeSpacing = nodeSpacing
     ) %>%
-    visPhysics(
-      solver = "hierarchicalRepulsion",
-      hierarchicalRepulsion = list(
-        nodeDistance = nodeSpacing, # Aplica o distanciamento do slider como um campo magnético que repele bolhas vizinhas!
-        springConstant = 0.01 # Deixa as linhas "moles" para que a repulsão vença a gravidade facilmente
-      )
-    ) %>%
+    visPhysics(enabled = FALSE) %>% # Desliga completamente qualquer simulação gravitacional/mola e "danças" da rede
     visOptions(
       highlightNearest = list(enabled = TRUE, degree = 1, hover = TRUE),
       nodesIdSelection = TRUE
     ) %>%
-    visInteraction(
-      navigationButtons = TRUE,
-      dragNodes = TRUE,
-      dragView = TRUE,
-      zoomView = TRUE
+    visNodes(
+      shape = "box",
+      margin = 12, # Adiciona uma excelente margem ao redor do texto, impedindo o "aperto" visual
+      widthConstraint = list(maximum = 140) # TRUQUE DO WRAPPING: Impede que o quadrado cresça infinitamente na horizontal!
+    ) %>%
+    visEdges(
+      smooth = list(
+        type = "cubicBezier",
+        forceDirection = "vertical",
+        roundness = 0.5
+      ), # Garante que as linhas sempre saem por baixo e entram por cima
+      shadow = FALSE,
+      arrows = list(to = list(enabled = TRUE, scaleFactor = 0.4)), # Reposicionando as setinhas (cabeça pequena)
+      color = list(
+        color = "rgba(165, 165, 165, 0.4)",
+        highlight = "rgba(209, 42, 42, 1)",
+        hover = "rgba(85, 85, 85, 0.9)"
+      )
     )
 }
 
